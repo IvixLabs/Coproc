@@ -38,12 +38,7 @@ class CoprocDemux
         }
         $messageProducer = $this->messageProducer;
 
-        if ($this->resultCollector === null) {
-            throw new \RuntimeException('Result collector is not specified');
-        }
         $resultCollector = $this->resultCollector;
-
-
         $maxCoprocsCount = $this->size;
         $maxMessagesCount = $this->maxMessages;
         $maxCyclesCount = $this->maxCycles;
@@ -90,7 +85,10 @@ class CoprocDemux
                 /** @var CoprocMaster $coprocMaster */
                 $coprocMaster = $coproc['master'];
 
-                $resultCollector($coprocMaster->readMessage());
+                $message = $coprocMaster->readMessage();
+                if($resultCollector !== null) {
+                    $resultCollector($message);
+                }
 
                 if (($data = $messageProducer()) !== false) {
 
