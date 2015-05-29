@@ -6,6 +6,7 @@ abstract class AbstractCoproc
 {
     const MESSAGE_EXIT = 'exit';
     const MESSAGE_OK = 'ok';
+    const MESSAGE_DATA = 'data';
 
     protected $initialized = false;
 
@@ -24,12 +25,17 @@ abstract class AbstractCoproc
      */
     protected $outputStream;
 
+    /**
+     * @var resource
+     */
+    protected $notifyStream;
+
 
     /**
      * @param callable $callback
      * @return mixed|null
      */
-    public function readMessage(\Closure $callback = null)
+    public function readMessage(callable $callback = null)
     {
         if (!$this->initialized) {
             throw new \RuntimeException('Co-process must be initialized');
@@ -78,6 +84,10 @@ abstract class AbstractCoproc
 
         $data = serialize($msg);
         $length = strlen($data);
+
+        if ($this->notifyStream) {
+            fwrite($this->notifyStream, self::MESSAGE_DATA);
+        }
 
         fwrite($this->outputStream, $length . "\n");
         while ($bytes = fwrite($this->outputStream, $data)) {
