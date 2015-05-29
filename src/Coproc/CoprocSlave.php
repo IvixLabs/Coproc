@@ -16,8 +16,13 @@ class CoprocSlave extends AbstractCoproc
         $this->outputStream = fopen('php://fd/3', 'wb');
 
         $notifyStream = fopen('php://fd/4', 'wb');
-        if ($notifyStream) {
-            $this->notifyStream = $notifyStream;
+        if (is_resource($notifyStream)) {
+            $close = (bool)fread($notifyStream, 1);
+            if($close) {
+                fclose($notifyStream);
+            } else {
+                $this->notifyStream = $notifyStream;
+            }
         }
 
         $this->initialized = true;

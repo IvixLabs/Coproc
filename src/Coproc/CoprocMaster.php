@@ -17,18 +17,20 @@ class CoprocMaster extends AbstractCoproc
             1 => STDOUT,
             2 => STDERR,
             3 => array('pipe', 'wb'),
+            4 => array('pipe', 'wb'),
         );
-        if ($notifyStream) {
-            $desc[4] = array('pipe', 'wb');
-        }
 
         $proc = proc_open($cmd, $desc, $pipes);
 
         $this->inputStream = $pipes[3];
         $this->outputStream = $pipes[0];
+
         if ($notifyStream) {
             $this->notifyStream = $pipes[4];
+        } else {
+            fwrite($pipes[4], 0);
         }
+
         $this->procResource = $proc;
 
         $this->initialized = true;
