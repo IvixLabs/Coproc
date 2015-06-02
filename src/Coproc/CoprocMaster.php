@@ -5,7 +5,7 @@ namespace IvixLabs\Coproc;
 class CoprocMaster extends AbstractCoproc
 {
 
-    public function start($cmd, $notifyStream = false)
+    public function start($cmd, $notifyStream = false, array $streams = array())
     {
         if ($this->initialized) {
             throw new \RuntimeException('Co-process must be not initialized');
@@ -17,23 +17,37 @@ class CoprocMaster extends AbstractCoproc
             1 => STDOUT,
             2 => STDERR,
             3 => array('pipe', 'wb'),
-            4 => array('pipe', 'wb'),
         );
+
+        if ($notifyStream) {
+            $notifyStreamIndex = count($desc);
+            $desc[$notifyStreamIndex] = array('pipe', 'wb');
+        } else {
+            $notifyStreamIndex = null;
+        }
+
+        $streamsIndexes = array();
+        foreach ($streams as $stream) {
+            $streamsIndexes[] = count($desc);
+            $desc[] = $stream;
+        }
 
         $proc = proc_open($cmd, $desc, $pipes);
 
         $this->inputStream = $pipes[3];
         $this->outputStream = $pipes[0];
-
         if ($notifyStream) {
             $this->notifyStream = $pipes[4];
-        } else {
-            fwrite($pipes[4], 0);
         }
-
         $this->procResource = $proc;
 
         $this->initialized = true;
+
+        $this->writeMessage(array(
+            'notifyStream' => $notifyStreamIndex,
+            'streams' => $streamsIndexes
+        ));
+
         return true;
     }
 

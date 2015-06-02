@@ -15,17 +15,19 @@ class CoprocSlave extends AbstractCoproc
         $this->inputStream = fopen('php://fd/0', 'rb');
         $this->outputStream = fopen('php://fd/3', 'wb');
 
-        $notifyStream = fopen('php://fd/4', 'wb');
-        if (is_resource($notifyStream)) {
-            $close = (bool)fread($notifyStream, 1);
-            if($close) {
-                fclose($notifyStream);
-            } else {
-                $this->notifyStream = $notifyStream;
-            }
+        $this->initialized = true;
+
+        $initData = $this->readMessage();
+
+        $notifyStreamIndex = $initData['notifyStream'];
+        if ($notifyStreamIndex !== null) {
+            $this->notifyStream = fopen('php://fd/' . $notifyStreamIndex, 'wb');
         }
 
-        $this->initialized = true;
+        $streamIndexes = $initData['streams'];
+        foreach ($streamIndexes as $streamIndex) {
+            $this->streams[] = $this->openStream($streamIndex);
+        }
 
         if ($callback === null) {
             $callback = $this->callback;
@@ -39,6 +41,15 @@ class CoprocSlave extends AbstractCoproc
     public function setCallback($callback)
     {
         $this->callback = $callback;
+    }
+
+    /**
+     * @param $index
+     * @return resource
+     */
+    public function openStream($index)
+    {
+        return fopen('php://fd/' . $index, 'wb');
     }
 
 

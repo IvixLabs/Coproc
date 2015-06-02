@@ -30,6 +30,11 @@ abstract class AbstractCoproc
      */
     protected $notifyStream;
 
+    /**
+     * @var resource[]
+     */
+    protected $streams;
+
 
     /**
      * @param callable $callback
@@ -100,5 +105,11 @@ abstract class AbstractCoproc
         }
     }
 
-
+    /**
+     * @return resource[]
+     */
+    public function getStreams()
+    {
+        return $this->streams;
+    }
 }
