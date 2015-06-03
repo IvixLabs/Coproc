@@ -87,12 +87,12 @@ abstract class AbstractCoproc
             throw new \RuntimeException('Co-process must be initialized');
         }
 
-        $data = serialize($msg);
-        $length = strlen($data);
-
         if ($this->notifyStream) {
             fwrite($this->notifyStream, self::MESSAGE_DATA);
         }
+
+        $data = serialize($msg);
+        $length = strlen($data);
 
         fwrite($this->outputStream, $length . "\n");
         while ($bytes = fwrite($this->outputStream, $data)) {
