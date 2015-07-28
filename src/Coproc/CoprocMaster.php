@@ -14,8 +14,8 @@ class CoprocMaster extends AbstractCoproc
 
         $desc = array(
             0 => array('pipe', 'rb'),
-            1 => STDOUT,
-            2 => STDERR,
+            1 => array('pipe', 'w'),
+            2 => array('pipe', 'w'),
             3 => array('pipe', 'wb'),
         );
 
@@ -36,6 +36,12 @@ class CoprocMaster extends AbstractCoproc
 
         $this->inputStream = $pipes[3];
         $this->outputStream = $pipes[0];
+
+        $this->stdoutStream = $pipes[1];
+        stream_set_blocking($this->stdoutStream, false);
+        $this->stderrStream = $pipes[2];
+        stream_set_blocking($this->stderrStream, false);
+
         if ($notifyStream) {
             $this->notifyStream = $pipes[4];
         }

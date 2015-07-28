@@ -31,6 +31,17 @@ abstract class AbstractCoproc
     protected $notifyStream;
 
     /**
+     * @var resource
+     */
+    protected $stdoutStream;
+
+    /**
+     * @var resource
+     */
+    protected $stderrStream;
+
+
+    /**
      * @var resource[]
      */
     protected $streams;
@@ -38,12 +49,28 @@ abstract class AbstractCoproc
 
     /**
      * @param callable $callback
+     * @throws \Exception
      * @return mixed|null
      */
     public function readMessage(callable $callback = null)
     {
         if (!$this->initialized) {
             throw new \RuntimeException('Co-process must be initialized');
+        }
+
+        if($this->stdoutStream !== null) {
+            $data = stream_get_contents($this->stdoutStream);
+            if (!empty($data)) {
+                echo $data;
+            }
+        }
+
+        if($this->stderrStream !== null) {
+            $data = stream_get_contents($this->stderrStream);
+            if (!empty($data)) {
+                $this->initialized = false;
+                throw new \Exception($data);
+            }
         }
 
         while (list($bytes) = fscanf($this->inputStream, "%s\n")) {
