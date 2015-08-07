@@ -75,10 +75,6 @@ class CoprocMaster extends AbstractCoproc
             throw new \RuntimeException('Cant close process with pid ' . $pid);
         }
 
-        //Need learn more about this
-        pcntl_waitpid($pid, $statusCode);
-
-
         proc_close($this->procResource);
 
         $this->initialized = false;
